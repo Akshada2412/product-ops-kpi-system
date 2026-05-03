@@ -14,16 +14,13 @@ st.set_page_config(
 
 # ---- LOAD DATA ----
 @st.cache_data
-@st.cache_data
 def load_data():
     from sklearn.ensemble import RandomForestClassifier
     from sklearn.preprocessing import LabelEncoder
-    import numpy as np
 
     activity = pd.read_csv('data/raw/product_activity.csv')
     users = pd.read_csv('data/raw/users.csv')
 
-    # Build churn scores on the fly
     all_months = activity['month'].unique()
     last_month = pd.Series(all_months).max()
 
@@ -60,6 +57,11 @@ def load_data():
             user_features[col]
         )
 
+    user_features['avg_nps'] = (
+        user_features['avg_nps']
+        .fillna(user_features['avg_nps'].median())
+    )
+
     feature_cols = [
         'avg_sessions', 'avg_features_used',
         'total_tickets', 'avg_nps', 'plan',
@@ -95,8 +97,6 @@ def load_data():
     )
 
     return activity, users, user_features
-
-activity, users, churn = load_data()
 
 activity, users, churn = load_data()
 
@@ -140,6 +140,11 @@ filtered = activity[
     (activity['industry'].isin(selected_industry))
 ]
 
+filtered_churn = churn[
+    churn['plan_name'].isin(selected_plan) &
+    churn['industry_name'].isin(selected_industry)
+]
+
 # ---- KPI METRICS ----
 col1, col2, col3, col4, col5 = st.columns(5)
 
@@ -147,10 +152,6 @@ total_mrr = filtered['mrr'].sum()
 active_users = filtered['user_id'].nunique()
 avg_sessions = filtered['sessions'].mean()
 avg_nps = filtered['nps_score'].mean()
-filtered_churn = churn[
-    churn['plan_name'].isin(selected_plan) &
-    churn['industry_name'].isin(selected_industry)
-]
 high_risk = len(filtered_churn[
     filtered_churn['risk_segment'] == 'HIGH RISK'
 ])
@@ -344,12 +345,6 @@ st.markdown(
     "identify at-risk accounts before they leave"
 )
 
-# Connect churn to sidebar filters
-filtered_churn = churn[
-    churn['plan_name'].isin(selected_plan) &
-    churn['industry_name'].isin(selected_industry)
-]
-
 risk_col1, risk_col2, risk_col3 = st.columns(3)
 
 high = filtered_churn[
@@ -375,7 +370,6 @@ risk_col3.metric(
     "Healthy"
 )
 
-# Risk distribution chart
 fig7 = px.pie(
     filtered_churn,
     names='risk_segment',
@@ -390,50 +384,11 @@ fig7 = px.pie(
 fig7.update_layout(height=300)
 st.plotly_chart(fig7, use_container_width=True)
 
-# High risk user table
 st.markdown("**🔴 Top High Risk Users — Act Now**")
 high_risk_display = (
     filtered_churn[
         filtered_churn['risk_segment'] == 'HIGH RISK'
     ]
-    [[
-        'user_id', 'churn_probability',
-        'avg_sessions', 'avg_features_used',
-        'total_tickets'
-    ]]
-    .sort_values('churn_probability', ascending=False)
-    .head(10)
-    .round(3)
-)
-high_risk_display.columns = [
-    'User ID', 'Churn Probability',
-    'Avg Sessions', 'Avg Features Used',
-    'Total Tickets'
-]
-st.dataframe(
-    high_risk_display.reset_index(drop=True),
-    use_container_width=True
-)
-
-# Risk distribution chart
-fig7 = px.pie(
-    churn,
-    names='risk_segment',
-    color='risk_segment',
-    color_discrete_map={
-        'HIGH RISK': '#e74c3c',
-        'MEDIUM RISK': '#f39c12',
-        'LOW RISK': '#2ecc71'
-    },
-    hole=0.4
-)
-fig7.update_layout(height=300)
-st.plotly_chart(fig7, use_container_width=True)
-
-# High risk user table
-st.markdown("**🔴 Top High Risk Users — Act Now**")
-high_risk_display = (
-    churn[churn['risk_segment'] == 'HIGH RISK']
     [[
         'user_id', 'churn_probability',
         'avg_sessions', 'avg_features_used',
