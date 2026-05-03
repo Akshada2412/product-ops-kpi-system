@@ -31,8 +31,8 @@ st.markdown("""
         );
     }
     .dashboard-title {
-        font-size: 1.65rem;
-        font-weight: 700;
+        font-size: 3.00rem;
+        font-weight: 800;
         letter-spacing: -0.5px;
         margin: 0 0 0.25rem 0;
     }
