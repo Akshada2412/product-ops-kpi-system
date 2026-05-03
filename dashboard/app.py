@@ -250,9 +250,11 @@ churn_rate = round(
 st.markdown(f"""
 <div class='hero'>
     <div class='hero-tag'>Live Analytics Dashboard</div>
-    <p class='hero-title'>
+    <p style='font-size:3rem;font-weight:800;
+              color:#ffffff;letter-spacing:-1px;
+              line-height:1.05;margin:0 0 0.5rem 0;'>
         Product Operations<br>
-        <span>Intelligence</span>
+        <span style='color:#4285F4;'>Intelligence</span>
     </p>
     <p class='hero-sub'>
         End-to-end SaaS cohort analysis —
@@ -289,10 +291,13 @@ with st.sidebar:
         default=sorted(activity['plan'].unique())
     )
 
+    industry_options = sorted(
+        activity['industry'].unique().tolist()
+    )
     selected_industry = st.multiselect(
         "Industry",
-        options=sorted(activity['industry'].unique()),
-        default=sorted(activity['industry'].unique())
+        options=industry_options,
+        default=industry_options
     )
 
     st.markdown("<br>", unsafe_allow_html=True)
