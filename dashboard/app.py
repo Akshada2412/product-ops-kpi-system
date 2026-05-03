@@ -69,7 +69,10 @@ total_mrr = filtered['mrr'].sum()
 active_users = filtered['user_id'].nunique()
 avg_sessions = filtered['sessions'].mean()
 avg_nps = filtered['nps_score'].mean()
-high_risk = len(churn[churn['risk_segment'] == 'HIGH RISK'])
+filtered_churn = churn[churn['plan'].isin(selected_plan)]
+high_risk = len(filtered_churn[
+    filtered_churn['risk_segment'] == 'HIGH RISK'
+])
 
 col1.metric("Total MRR", f"${total_mrr:,.0f}")
 col2.metric("Active Users", f"{active_users:,}")
@@ -260,11 +263,17 @@ st.markdown(
     "identify at-risk accounts before they leave"
 )
 
+# Connect churn to sidebar filters
+filtered_churn = churn[churn['plan'].isin(selected_plan)]
+
 risk_col1, risk_col2, risk_col3 = st.columns(3)
 
-high = churn[churn['risk_segment'] == 'HIGH RISK']
-med = churn[churn['risk_segment'] == 'MEDIUM RISK']
-low = churn[churn['risk_segment'] == 'LOW RISK']
+high = filtered_churn[
+    filtered_churn['risk_segment'] == 'HIGH RISK']
+med = filtered_churn[
+    filtered_churn['risk_segment'] == 'MEDIUM RISK']
+low = filtered_churn[
+    filtered_churn['risk_segment'] == 'LOW RISK']
 
 risk_col1.metric(
     "🔴 High Risk Users",
@@ -280,6 +289,46 @@ risk_col3.metric(
     "🟢 Low Risk Users",
     len(low),
     "Healthy"
+)
+
+# Risk distribution chart
+fig7 = px.pie(
+    filtered_churn,
+    names='risk_segment',
+    color='risk_segment',
+    color_discrete_map={
+        'HIGH RISK': '#e74c3c',
+        'MEDIUM RISK': '#f39c12',
+        'LOW RISK': '#2ecc71'
+    },
+    hole=0.4
+)
+fig7.update_layout(height=300)
+st.plotly_chart(fig7, use_container_width=True)
+
+# High risk user table
+st.markdown("**🔴 Top High Risk Users — Act Now**")
+high_risk_display = (
+    filtered_churn[
+        filtered_churn['risk_segment'] == 'HIGH RISK'
+    ]
+    [[
+        'user_id', 'churn_probability',
+        'avg_sessions', 'avg_features_used',
+        'total_tickets'
+    ]]
+    .sort_values('churn_probability', ascending=False)
+    .head(10)
+    .round(3)
+)
+high_risk_display.columns = [
+    'User ID', 'Churn Probability',
+    'Avg Sessions', 'Avg Features Used',
+    'Total Tickets'
+]
+st.dataframe(
+    high_risk_display.reset_index(drop=True),
+    use_container_width=True
 )
 
 # Risk distribution chart
