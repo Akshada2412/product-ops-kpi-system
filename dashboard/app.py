@@ -69,7 +69,7 @@ total_mrr = filtered['mrr'].sum()
 active_users = filtered['user_id'].nunique()
 avg_sessions = filtered['sessions'].mean()
 avg_nps = filtered['nps_score'].mean()
-filtered_churn = churn[churn['plan'].isin(selected_plan)]
+filtered_churn = churn[churn['plan_name'].isin(selected_plan)]
 high_risk = len(filtered_churn[
     filtered_churn['risk_segment'] == 'HIGH RISK'
 ])
@@ -264,7 +264,7 @@ st.markdown(
 )
 
 # Connect churn to sidebar filters
-filtered_churn = churn[churn['plan'].isin(selected_plan)]
+filtered_churn = churn[churn['plan_name'].isin(selected_plan)]
 
 risk_col1, risk_col2, risk_col3 = st.columns(3)
 

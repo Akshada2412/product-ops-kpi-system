@@ -59,6 +59,9 @@ user_features = user_features.merge(
     on='user_id'
 )
 
+# Save original plan text before encoding
+plan_text = user_features['plan'].copy()
+
 # ---- ENCODE CATEGORICAL COLUMNS ----
 le = LabelEncoder()
 for col in ['plan', 'industry',
@@ -137,6 +140,8 @@ print()
 
 # Save results
 os.makedirs('data/processed', exist_ok=True)
+# Save with readable plan names
+user_features['plan_name'] = plan_text
 user_features.to_csv(
     'data/processed/churn_scores.csv', index=False
 )
