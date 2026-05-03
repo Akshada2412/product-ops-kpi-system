@@ -51,6 +51,7 @@ def load_data():
     )
 
     plan_text = user_features['plan'].copy()
+    industry_text = user_features['industry'].copy()
 
     le = LabelEncoder()
     for col in ['plan', 'industry',
@@ -58,11 +59,6 @@ def load_data():
         user_features[col] = le.fit_transform(
             user_features[col]
         )
-
-    user_features['avg_nps'] = (
-        user_features['avg_nps']
-        .fillna(user_features['avg_nps'].median())
-    )
 
     feature_cols = [
         'avg_sessions', 'avg_features_used',
@@ -83,6 +79,7 @@ def load_data():
         model.predict_proba(X)[:, 1]
     )
     user_features['plan_name'] = plan_text
+    user_features['industry_name'] = industry_text
 
     def risk_segment(prob):
         if prob >= 0.7:
@@ -152,7 +149,7 @@ avg_sessions = filtered['sessions'].mean()
 avg_nps = filtered['nps_score'].mean()
 filtered_churn = churn[
     churn['plan_name'].isin(selected_plan) &
-    churn['industry'].isin(selected_industry)
+    churn['industry_name'].isin(selected_industry)
 ]
 high_risk = len(filtered_churn[
     filtered_churn['risk_segment'] == 'HIGH RISK'
@@ -350,7 +347,7 @@ st.markdown(
 # Connect churn to sidebar filters
 filtered_churn = churn[
     churn['plan_name'].isin(selected_plan) &
-    churn['industry'].isin(selected_industry)
+    churn['industry_name'].isin(selected_industry)
 ]
 
 risk_col1, risk_col2, risk_col3 = st.columns(3)
