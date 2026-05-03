@@ -46,7 +46,7 @@ st.markdown("""
         margin-bottom: 0.75rem;
     }
     .hero-title {
-        font-size: 3rem;
+        font-size: 6rem;
         font-weight: 800;
         color: #ffffff;
         letter-spacing: -1px;
