@@ -315,7 +315,10 @@ high_risk_display.columns = [
     'Avg Sessions', 'Avg Features Used',
     'Total Tickets'
 ]
-st.dataframe(high_risk_display, use_container_width=True)
+st.dataframe(
+    high_risk_display.reset_index(drop=True),
+    use_container_width=True
+)
 
 st.divider()
 
