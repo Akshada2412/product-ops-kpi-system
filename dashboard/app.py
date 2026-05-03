@@ -14,11 +14,92 @@ st.set_page_config(
 
 # ---- LOAD DATA ----
 @st.cache_data
+@st.cache_data
 def load_data():
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.preprocessing import LabelEncoder
+    import numpy as np
+
     activity = pd.read_csv('data/raw/product_activity.csv')
     users = pd.read_csv('data/raw/users.csv')
-    churn = pd.read_csv('data/processed/churn_scores.csv')
-    return activity, users, churn
+
+    # Build churn scores on the fly
+    all_months = activity['month'].unique()
+    last_month = pd.Series(all_months).max()
+
+    user_last = activity.groupby('user_id')['month'].max().reset_index()
+    user_last.columns = ['user_id', 'last_active_month']
+    user_last['churned'] = (
+        user_last['last_active_month'] < last_month
+    ).astype(int)
+
+    user_features = activity.groupby('user_id').agg(
+        avg_sessions=('sessions', 'mean'),
+        avg_features_used=('features_used', 'mean'),
+        total_tickets=('support_tickets', 'sum'),
+        avg_nps=('nps_score', 'mean'),
+        plan=('plan', 'first'),
+    ).reset_index()
+
+    user_features = user_features.merge(
+        user_last[['user_id', 'churned']], on='user_id'
+    )
+    user_features = user_features.merge(
+        users[['user_id', 'industry',
+               'company_size', 'acquisition_channel']],
+        on='user_id'
+    )
+
+    plan_text = user_features['plan'].copy()
+
+    le = LabelEncoder()
+    for col in ['plan', 'industry',
+                'company_size', 'acquisition_channel']:
+        user_features[col] = le.fit_transform(
+            user_features[col]
+        )
+
+    user_features['avg_nps'] = (
+        user_features['avg_nps']
+        .fillna(user_features['avg_nps'].median())
+    )
+
+    feature_cols = [
+        'avg_sessions', 'avg_features_used',
+        'total_tickets', 'avg_nps', 'plan',
+        'industry', 'company_size',
+        'acquisition_channel'
+    ]
+
+    X = user_features[feature_cols]
+    y = user_features['churned']
+
+    model = RandomForestClassifier(
+        n_estimators=100, random_state=42
+    )
+    model.fit(X, y)
+
+    user_features['churn_probability'] = (
+        model.predict_proba(X)[:, 1]
+    )
+    user_features['plan_name'] = plan_text
+
+    def risk_segment(prob):
+        if prob >= 0.7:
+            return 'HIGH RISK'
+        elif prob >= 0.4:
+            return 'MEDIUM RISK'
+        else:
+            return 'LOW RISK'
+
+    user_features['risk_segment'] = (
+        user_features['churn_probability']
+        .apply(risk_segment)
+    )
+
+    return activity, users, user_features
+
+activity, users, churn = load_data()
 
 activity, users, churn = load_data()
 
