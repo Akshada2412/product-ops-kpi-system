@@ -46,11 +46,11 @@ st.markdown("""
         margin-bottom: 0.75rem;
     }
     .hero-title {
-        font-size: 2.2rem;
+        font-size: 3rem;
         font-weight: 800;
         color: #ffffff;
-        letter-spacing: -0.8px;
-        line-height: 1.1;
+        letter-spacing: -1px;
+        line-height: 1.05;
         margin: 0 0 0.5rem 0;
     }
     .hero-title span {
@@ -419,6 +419,14 @@ with r1:
             '#4285F4', '#34A853', '#FBBC04', '#EA4335'
         ],
     )
+    fig1.update_traces(
+        hovertemplate=(
+            "<b>%{fullData.name}</b><br>"
+            "Month: %{x}<br>"
+            "MRR: <b>$%{y:,.0f}</b>"
+            "<extra></extra>"
+        )
+    )
     fig1.update_layout(
         height=300,
         margin=dict(l=0, r=0, t=5, b=0),
@@ -492,7 +500,15 @@ with e1:
         color_continuous_scale=['#1a4fa0', '#4285F4'],
         text=sess['sessions'].round(1)
     )
-    fig3.update_traces(textposition='outside')
+    fig3.update_traces(
+        textposition='outside',
+        hovertemplate=(
+            "<b>%{y}</b><br>"
+            "Avg Sessions: <b>%{x:.1f}</b> / month<br>"
+            "<i>Higher = more engaged users</i>"
+            "<extra></extra>"
+        )
+    )
     fig3.update_layout(
         height=CHART_H,
         margin=dict(l=0, r=0, t=5, b=0),
@@ -523,7 +539,15 @@ with e2:
         color_continuous_scale=['#1a6e3c', '#34A853'],
         text=feat['features_used'].round(1)
     )
-    fig4.update_traces(textposition='outside')
+    fig4.update_traces(
+        textposition='outside',
+        hovertemplate=(
+            "<b>%{y}</b><br>"
+            "Avg Features Used: <b>%{x:.1f}</b> / 10<br>"
+            "<i>Higher = deeper product adoption</i>"
+            "<extra></extra>"
+        )
+    )
     fig4.update_layout(
         height=CHART_H,
         margin=dict(l=0, r=0, t=5, b=0),
@@ -563,7 +587,15 @@ with e3:
         ],
         text='per_user'
     )
-    fig5.update_traces(textposition='outside')
+    fig5.update_traces(
+        textposition='outside',
+        hovertemplate=(
+            "<b>%{y}</b><br>"
+            "Tickets per User: <b>%{x:.2f}</b><br>"
+            "<i>Lower = healthier, less frustrated users</i>"
+            "<extra></extra>"
+        )
+    )
     fig5.update_layout(
         height=CHART_H,
         margin=dict(l=0, r=0, t=5, b=0),
@@ -607,9 +639,19 @@ with s1:
             '#EA4335', '#FBBC04', '#34A853'
         ],
         text=nps['avg_nps'].round(2),
-        range_color=[0, 10]
+        range_color=[0, 10],
+        hover_data={'avg_nps': ':.2f'},
+        custom_data=['avg_nps']
     )
-    fig6.update_traces(textposition='outside')
+    fig6.update_traces(
+        textposition='outside',
+        hovertemplate=(
+            "<b>%{y}</b><br>"
+            "Avg NPS Score: <b>%{x:.2f}</b> / 10<br>"
+            "<i>Score above 7 = strong satisfaction</i>"
+            "<extra></extra>"
+        )
+    )
     fig6.update_layout(
         height=280,
         margin=dict(l=0, r=0, t=5, b=0),
@@ -703,6 +745,15 @@ with ch1:
         },
         hole=0.6
     )
+    fig8.update_traces(
+        textinfo='percent',
+        hovertemplate=(
+            "<b>%{label}</b><br>"
+            "Users: <b>%{value}</b><br>"
+            "Share: <b>%{percent}</b><br>"
+            "<extra></extra>"
+        )
+    )
     fig8.update_layout(
         height=260,
         margin=dict(l=0, r=0, t=5, b=30),
@@ -711,7 +762,6 @@ with ch1:
             orientation='h', y=-0.2, title=None
         )
     )
-    fig8.update_traces(textinfo='percent')
     st.plotly_chart(fig8, use_container_width=True)
 
 with ch2:
