@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
+from user_analytics_tab import render_user_analytics_tab
 
 st.set_page_config(
     page_title="Product Operations Intelligence",
@@ -807,3 +808,11 @@ with ch2:
         use_container_width=True,
         height=260
     )
+st.markdown("---")
+
+st.markdown(
+    "<p class='section-label'>User Analytics</p>",
+    unsafe_allow_html=True
+)
+
+render_user_analytics_tab()
