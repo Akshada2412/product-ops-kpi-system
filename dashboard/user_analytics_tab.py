@@ -401,7 +401,7 @@ def render_user_analytics_tab():
         return ""
 
     st.dataframe(
-        ltv_display.style.applymap(color_ltv),
+        ltv_display.style.map(color_ltv),
         use_container_width=True, hide_index=True
     )
 
