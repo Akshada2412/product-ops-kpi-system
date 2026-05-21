@@ -149,7 +149,7 @@ def render_user_analytics_tab():
         texttemplate="%{text}",
         textfont=dict(size=11),
         showscale=True,
-        colorbar=dict(title="Retention %", titleside="right"),
+        colorbar=dict(title=dict(text="Retention %", side="right")),
         zmin=0, zmax=100
     ))
     fig_cohort.update_layout(
